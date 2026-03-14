@@ -53,11 +53,11 @@ def evaluate_model(clf, X_test: np.ndarray, y_test: np.ndarray) -> dict:
     """Evaluate the model and return the evaluation metrics."""
     try:
         y_pred = clf.predict(X_test)
-        y_pred_proba = clf.predict_proba(X_test)[:, 1]
+        y_pred_proba = clf.predict_proba(X_test)[:, 0]  # probability of 'happiness' (assuming class 0)
 
         accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, pos_label='happiness')
+        recall = recall_score(y_test, y_pred, pos_label='happiness')
         auc = roc_auc_score(y_test, y_pred_proba)
 
         metrics_dict = {
@@ -84,7 +84,7 @@ def save_metrics(metrics: dict, file_path: str) -> None:
 
 def main():
     try:
-        clf = load_model('./model.pkl')
+        clf = load_model('./models/model.pkl')
         test_data = load_data('./data/features/test_tfidf.csv')
         
         X_test = test_data.iloc[:, :-1].values
@@ -92,7 +92,7 @@ def main():
 
         metrics = evaluate_model(clf, X_test, y_test)
         
-        save_metrics(metrics, './metrics.json')
+        save_metrics(metrics, './reports/metrics.json')
     except Exception as e:
         logger.error('Failed to complete the model evaluation process: %s', e)
         print(f"Error: {e}")
